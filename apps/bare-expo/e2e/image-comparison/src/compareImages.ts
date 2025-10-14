@@ -42,9 +42,9 @@ function createSuccessResult(
   if (diffPixels === 0) {
     message = '✅ Images are identical';
   } else if (success) {
-    message = `✅ Images are similar (${diffPercentage}% difference, similarityThreshold ${similarityThreshold})`;
+    message = `✅ Images are similar (${(diffPercentage * 100).toFixed(2)}% difference, threshold ${(similarityThreshold * 100).toFixed(2)}%)`;
   } else {
-    message = `❌ Images are significantly different (${diffPercentage}% difference)`;
+    message = `❌ Images are significantly different (${(diffPercentage * 100).toFixed(2)}% difference)`;
   }
 
   return {
@@ -152,8 +152,8 @@ export async function compareImages({
     }
 
     const totalPixels = width * height;
-    const diffPercentage = (numDiffPixels / totalPixels) * 100;
-    const diffPercentageFormatted = parseFloat(diffPercentage.toFixed(2));
+    const diffPercentage = numDiffPixels / totalPixels;
+    const diffPercentageFormatted = parseFloat(diffPercentage.toFixed(4));
 
     return createSuccessResult(
       numDiffPixels,

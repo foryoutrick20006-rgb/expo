@@ -23,13 +23,8 @@ Bun.serve({
         const bodyJson = await req.json();
         const parsedBody = schema.parse(bodyJson);
         const isNormalizationMode = 'mode' in parsedBody && parsedBody.mode === 'normalize';
-        const thresholdDefaultValue = isNormalizationMode ? 15 : 5;
 
-        const {
-          similarityThreshold = thresholdDefaultValue,
-          platform,
-          resizingFactor,
-        } = parsedBody;
+        const { similarityThreshold, platform, resizingFactor } = parsedBody;
 
         const testID = 'testID' in parsedBody ? parsedBody.testID : undefined;
 

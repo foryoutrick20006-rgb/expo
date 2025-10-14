@@ -33,7 +33,7 @@ describe('compareImages', () => {
       const result = await compareImages({
         image1Path: image1,
         image2Path: image2,
-        similarityThreshold: 5,
+        similarityThreshold: 0.05,
         isNormalizationMode,
       });
 
@@ -53,7 +53,7 @@ describe('compareImages', () => {
     const result = await compareImages({
       image1Path: image1,
       image2Path: image2,
-      similarityThreshold: 100, // High threshold to ensure success
+      similarityThreshold: 1, // High threshold to ensure success
       isNormalizationMode: true,
     });
 
@@ -69,12 +69,12 @@ describe('compareImages', () => {
     const result = await compareImages({
       image1Path: image1,
       image2Path: image2,
-      similarityThreshold: 1, // Very low threshold
+      similarityThreshold: 0.01, // Very low threshold
       isNormalizationMode: true,
     });
 
     expect(result.success).toBe(false);
-    expect(result.diffPercentage).toBeGreaterThan(1);
+    expect(result.diffPercentage).toBeGreaterThan(0.01);
     expect(result.message).toContain('significantly different');
   });
 
@@ -103,7 +103,7 @@ describe('compareImages', () => {
       image1Path: image1,
       image2Path: image2,
       isNormalizationMode: true,
-      similarityThreshold: 50, // Reasonable threshold for cross-platform
+      similarityThreshold: 0.5, // Reasonable threshold for cross-platform
     });
 
     // Should succeed because normalization handles dimension differences
