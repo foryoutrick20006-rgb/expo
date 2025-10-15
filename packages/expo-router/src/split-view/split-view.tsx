@@ -1,24 +1,34 @@
-import React, { createContext, isValidElement } from 'react';
-import { SplitViewHost, SplitViewScreen } from 'react-native-screens/experimental';
+import React, { createContext, isValidElement, use, type ReactNode } from 'react';
+import {
+  SplitViewHost,
+  SplitViewScreen,
+  type SplitViewHostProps,
+} from 'react-native-screens/experimental';
 
 import { SplitViewColumn } from './elements';
-import type { SidebarProps } from './types';
+import { IsWithinLayoutContext } from '../layouts/withLayoutContext';
 import { Slot } from '../views/Navigator';
-import { View } from 'react-native';
 
-const SplitViewContext = createContext(0);
+const IsWithinSplitViewContext = createContext(false);
 
-function SplitViewNavigator({ children, displayMode }: SidebarProps) {
-  const numberOfParentSidebars = React.useContext(SplitViewContext);
+export interface SplitViewProps extends Omit<SplitViewHostProps, 'children'> {
+  children?: ReactNode;
+}
 
-  if (numberOfParentSidebars > 0) {
+function SplitViewNavigator({ children, ...splitViewHostProps }: SplitViewProps) {
+  if (use(IsWithinSplitViewContext)) {
     throw new Error('There can only be one SplitView in the navigation hierarchy.');
   }
 
+  // TODO: Add better way of detecting if SplitView is rendered inside Native navigator.
+  if (use(IsWithinLayoutContext)) {
+    throw new Error('SplitView cannot be used inside another navigator, except for Slot.');
+  }
+
   const WrappedSlot = () => (
-    <SplitViewContext value={numberOfParentSidebars + 1}>
+    <IsWithinLayoutContext value>
       <Slot />
-    </SplitViewContext>
+    </IsWithinLayoutContext>
   );
 
   const allChildrenArray = React.Children.toArray(children);
@@ -35,27 +45,14 @@ function SplitViewNavigator({ children, displayMode }: SidebarProps) {
     throw new Error('There can only be two SplitView.Column in the SplitView.');
   }
 
-  const numberOfScreens = numberOfSidebars === 1 ? 'one' : 'two';
-  const mode = displayMode === 'over' ? 'Over' : 'Beside';
-  const preferredDisplayMode =
-    numberOfSidebars === 0 ? 'secondaryOnly' : (`${numberOfScreens}${mode}Secondary` as const);
+  if (numberOfSidebars === 0) {
+    console.warn('No SplitView.Column found in SplitView.');
+    return <Slot />;
+  }
 
-
+  // The key is needed, because number of columns cannot be changed dynamically
   return (
-    <SplitViewHost
-      preferredDisplayMode={preferredDisplayMode}
-      preferredSplitBehavior="tile"
-      displayModeButtonVisibility="always">
-      {numberOfSidebars === 0 && (
-        <SplitViewScreen.Column>
-          <View />
-        </SplitViewScreen.Column>
-      )}
-      {numberOfSidebars < 2 && (
-        <SplitViewScreen.Column>
-          <View />
-        </SplitViewScreen.Column>
-      )}
+    <SplitViewHost key={numberOfSidebars} {...splitViewHostProps}>
       {columnChildren}
       <SplitViewScreen.Column>
         <WrappedSlot />

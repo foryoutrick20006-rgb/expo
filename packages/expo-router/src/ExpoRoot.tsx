@@ -186,6 +186,7 @@ function Content() {
     children,
     id: INTERNAL_SLOT_NAME,
   });
+
   return (
     <NavigationContent>{descriptors[state.routes[state.index].key].render()}</NavigationContent>
   );

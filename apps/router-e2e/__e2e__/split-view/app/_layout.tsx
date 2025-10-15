@@ -1,6 +1,7 @@
-import { SplitView, useGlobalSearchParams, useRouter } from 'expo-router';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
+import { SplitView } from 'expo-router/unstable-split-view';
 import React from 'react';
-import { PlatformColor, Pressable, Text } from 'react-native';
+import { PlatformColor, Pressable, ScrollView, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-screens/experimental';
 
 const passkeys = ['Github', 'Google', 'Facebook', 'Twitter', 'Apple', 'Microsoft', 'Amazon'];
@@ -9,22 +10,8 @@ const security = ['Admin1234', 'Root'];
 const all = [...passkeys, ...security];
 
 export default function Layout() {
-  const params = useGlobalSearchParams();
-  const data = (() => {
-    switch (params.type) {
-      case 'all':
-      case undefined:
-        return all;
-      case 'passkeys':
-        return passkeys;
-      case 'security':
-        return security;
-      default:
-        return [];
-    }
-  })();
   return (
-    <SplitView>
+    <SplitView preferredDisplayMode="secondaryOnly">
       <SplitView.Column>
         <SafeAreaView
           edges={{ top: true }}
@@ -44,19 +31,33 @@ export default function Layout() {
         </SafeAreaView>
       </SplitView.Column>
       <SplitView.Column>
-        <SafeAreaView
-          edges={{ top: true, left: true }}
-          style={{
-            flex: 1,
-            gap: 8,
-            backgroundColor: PlatformColor('lightGray'),
-          }}>
-          {data.map((item, index) => (
-            <PasswordElement key={item} title={item} />
-          ))}
-        </SafeAreaView>
+        <PasswordElementList />
       </SplitView.Column>
     </SplitView>
+  );
+}
+
+function PasswordElementList() {
+  const params = useGlobalSearchParams();
+  const data = (() => {
+    switch (params.type) {
+      case 'all':
+      case undefined:
+        return all;
+      case 'passkeys':
+        return passkeys;
+      case 'security':
+        return security;
+      default:
+        return [];
+    }
+  })();
+  return (
+    <ScrollView contentInsetAdjustmentBehavior="automatic">
+      {data.map((item, index) => (
+        <PasswordElement key={item} title={item} />
+      ))}
+    </ScrollView>
   );
 }
 
@@ -100,7 +101,9 @@ function PasswordElement({ title }: { title: string }) {
         backgroundColor: isActive ? PlatformColor('systemBlue') : undefined,
         padding: 12,
       }}>
-      <Text style={{ color: isActive ? 'white' : 'black', fontSize: 16 }}>{title}</Text>
+      <SafeAreaView edges={{ left: true }}>
+        <Text style={{ color: isActive ? 'white' : 'black', fontSize: 16 }}>{title}</Text>
+      </SafeAreaView>
     </Pressable>
   );
 }
